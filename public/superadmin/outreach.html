@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>كابينة وكيل الاستحواذ الذكي | اطلب</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --pink: #ff2d81;
+    --purple: #8e2de2;
+    --bg: #0f0c20;
+    --bg2: #15102a;
+    --text: #f5f3f7;
+    --sub: #b1a9c3;
+    --glass: rgba(255, 255, 255, 0.04);
+    --border: rgba(255, 255, 255, 0.08);
+    --green: #34d399;
+    --amber: #f0c06a;
+    --red: #ff6b6b;
+    --neon-blue: #00f2fe;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Tajawal', sans-serif; }
+  body {
+    background: linear-gradient(135deg, #0f0c20, #15102a 50%, #060214);
+    min-height: 100vh;
+    color: var(--text);
+    padding: 24px;
+  }
+  .wrap { max-width: 1200px; margin: 0 auto; }
+  .top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 10px; }
+  .logo {
+    font-size: 1.8rem;
+    font-weight: 700;
+    background: linear-gradient(to left, var(--pink), var(--purple));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .sub { color: var(--sub); font-size: .95rem; margin-bottom: 22px; }
+  a.back { color: var(--sub); text-decoration: none; font-size: .9rem; border: 1px solid var(--border); padding: 8px 14px; border-radius: 10px; transition: all 0.2s; }
+  a.back:hover { background: var(--glass); border-color: var(--pink); color: #fff; }
+  
+  /* Layout Grid */
+  .layout-grid {
+    display: grid;
+    grid-template-columns: 1fr 350px;
+    gap: 20px;
+    margin-top: 20px;
+  }
+  @media (max-width: 900px) {
+    .layout-grid { grid-template-columns: 1fr; }
+  }
+
+  /* Stats Row */
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-bottom: 22px; }
+  .stat { background: var(--glass); border: 1px solid var(--border); border-radius: 12px; padding: 12px; text-align: center; backdrop-filter: blur(10px); }
+  .stat .v { font-size: 1.8rem; font-weight: 700; }
+  .stat .l { color: var(--sub); font-size: .8rem; margin-top: 2px; }
+
+  .card {
+    background: var(--glass);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 16px;
+    backdrop-filter: blur(12px);
+    position: relative;
+    overflow: hidden;
+  }
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: linear-gradient(to bottom, var(--pink), var(--purple));
+  }
+  .card.card-right::before {
+    background: linear-gradient(to bottom, var(--neon-blue), var(--purple));
+  }
+
+  h3 { font-size: 1.15rem; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+  
+  .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
+  label { display: block; font-size: .8rem; color: var(--sub); margin-bottom: 5px; font-weight: 500; }
+  input, select, textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: rgba(0, 0, 0, 0.3);
+    color: var(--text);
+    font-size: .9rem;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  input:focus, select:focus, textarea:focus { border-color: var(--pink); box-shadow: 0 0 8px rgba(255, 45, 129, 0.2); }
+  select option { background: #1a1430; }
+
+  .btn {
+    background: linear-gradient(to right, var(--pink), var(--purple));
+    color: #fff;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 10px;
+    font-weight: 700;
+    cursor: pointer;
+    font-size: .9rem;
+    transition: opacity 0.2s, transform 0.1s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .btn:hover { opacity: .92; transform: translateY(-1px); }
+  .btn:active { transform: translateY(1px); }
+  .btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--text); }
+  .btn-ghost:hover { background: var(--glass); border-color: var(--pink); }
+  .btn-sm { padding: 6px 12px; font-size: .82rem; border-radius: 9px; }
+  .btn-green { background: linear-gradient(to right, #10b981, #059669); }
+  .btn-red { background: linear-gradient(to right, #ef4444, #dc2626); }
+
+  .filters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+  .pill { background: var(--glass); border: 1px solid var(--border); color: var(--sub); padding: 7px 14px; border-radius: 20px; cursor: pointer; font-size: .85rem; transition: all 0.2s; }
+  .pill.on { background: var(--pink); color: #fff; border-color: transparent; box-shadow: 0 0 10px rgba(255, 45, 129, 0.4); }
+  .pill:hover:not(.on) { background: rgba(255,255,255,0.08); }
+
+  /* Prospect Cards */
+  .p-card { background: var(--glass); border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 12px; transition: transform 0.2s, border-color 0.2s; }
+  .p-card:hover { border-color: rgba(255, 45, 129, 0.3); transform: translateY(-2px); }
+  .p-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .p-name { font-weight: 700; font-size: 1.1rem; }
+  .p-meta { color: var(--sub); font-size: .82rem; margin: 6px 0; }
+  .p-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+  .badge { font-size: .72rem; padding: 3px 10px; border-radius: 20px; font-weight: bold; }
+  .st-NEW { background: rgba(120, 140, 200, 0.18); color: #aab6e6; }
+  .st-CONTACTED { background: rgba(240, 192, 106, 0.15); color: var(--amber); }
+  .st-INTERESTED { background: rgba(142, 45, 226, 0.2); color: #c4a9ff; }
+  .st-DEMO { background: rgba(255, 45, 129, 0.15); color: #ff8fb5; }
+  .st-WON { background: rgba(52, 211, 153, 0.16); color: var(--green); }
+  .st-LOST { background: rgba(255, 107, 107, 0.14); color: var(--red); }
+
+  /* Radar / Scanning */
+  .search-box { display: flex; gap: 10px; }
+  .radar-box { background: rgba(0, 0, 0, 0.4); border: 1px dashed var(--pink); border-radius: 12px; padding: 15px; margin-top: 15px; display: flex; flex-direction: column; gap: 10px; max-height: 250px; position: relative; }
+  .radar-scanner { width: 50px; height: 50px; border: 3px solid transparent; border-top-color: var(--pink); border-bottom-color: var(--purple); border-radius: 50%; animation: spin 1s linear infinite; align-self: center; }
+  .radar-console { font-family: monospace; color: #34d399; font-size: 0.85rem; direction: ltr; text-align: left; white-space: pre-wrap; overflow-y: auto; height: 120px; padding: 5px; border-radius: 6px; background: rgba(0,0,0,0.3); }
+
+  /* Discovered List */
+  .discovered-list { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; max-height: 300px; overflow-y: auto; padding-right: 5px; }
+  .discovered-item { background: rgba(0, 0, 0, 0.25); border: 1px solid var(--border); border-radius: 10px; padding: 12px; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+  .discovered-info { flex: 1; }
+  .discovered-name { font-weight: bold; font-size: 0.95rem; }
+  .discovered-subtext { font-size: 0.8rem; color: var(--sub); margin-top: 3px; }
+
+  /* Console Terminal */
+  .terminal-box { background: #05020c; border: 1px solid var(--border); border-radius: 12px; padding: 12px; font-family: monospace; color: #a7f3d0; font-size: 0.82rem; height: 220px; overflow-y: auto; margin-top: 10px; direction: ltr; text-align: left; box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.8); }
+
+  /* Overlays / Modals */
+  .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); display: none; align-items: center; justify-content: center; z-index: 50; padding: 18px; backdrop-filter: blur(5px); }
+  .overlay.on { display: flex; }
+  .modal { background: #15102a; border: 1px solid var(--border); border-radius: 16px; padding: 24px; max-width: 620px; width: 100%; max-height: 90vh; overflow: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+  .modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+  .close { cursor: pointer; color: var(--sub); font-size: 1.6rem; background: none; border: none; transition: color 0.2s; }
+  .close:hover { color: #fff; }
+  .kindbtns { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+  .variant { background: rgba(0,0,0,0.25); border: 1px solid var(--border); border-radius: 12px; padding: 14px; margin-bottom: 12px; white-space: pre-wrap; line-height: 1.7; font-size: .92rem; }
+  .v-actions { display: flex; gap: 8px; margin-top: 10px; }
+  
+  .toast { position: fixed; bottom: 20px; right: 20px; background: var(--green); color: #06281c; padding: 12px 18px; border-radius: 10px; font-weight: 700; display: none; z-index: 60; box-shadow: 0 5px 15px rgba(52, 211, 153, 0.3); }
+  .empty { text-align: center; color: var(--sub); padding: 30px; font-style: italic; }
+  
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div>
+      <div class="logo">🎯 وكيل الاستحواذ وجلب المشتركين</div>
+    </div>
+    <a class="back" href="/superadmin">→ لوحة التحكم الرئيسية</a>
+  </div>
+  <div class="sub">البحث التلقائي والمستقل عن المطاعم الخليجية والتواصل معها لتأمين أول مشترك رسمي لمنصة اطلب.</div>
+
+  <div class="stats" id="stats"></div>
+
+  <!-- Main Grid -->
+  <div class="layout-grid">
+    <!-- Left Column: Pipeline CRM -->
+    <div>
+      <div class="card">
+        <h3>➕ إضافة مطعم مستهدف يدوياً</h3>
+        <form id="addForm">
+          <div class="form-grid">
+            <div><label>اسم المطعم *</label><input id="f_name" required placeholder="مثال: مطعم البيك"></div>
+            <div><label>المدينة</label><input id="f_city" placeholder="الرياض"></div>
+            <div><label>واتساب (مع رمز الدولة)</label><input id="f_phone" placeholder="9665xxxxxxxx"></div>
+            <div><label>انستقرام</label><input id="f_instagram" placeholder="@store"></div>
+            <div><label>المصدر</label><input id="f_source" placeholder="توصية / بحث يدوي"></div>
+          </div>
+          <div style="margin-top:12px"><button class="btn" type="submit">إضافة للقائمة</button></div>
+        </form>
+      </div>
+
+      <!-- Prospect CRM List -->
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
+          <h3 style="margin:0">📋 خط أنابيب الاستحواذ (Pipeline)</h3>
+          <div class="filters" id="filters" style="margin:0"></div>
+        </div>
+        <div id="list"></div>
+      </div>
+    </div>
+
+    <!-- Right Column: Agent Controls & Console -->
+    <div>
+      <!-- Agent Settings -->
+      <div class="card card-right">
+        <h3>⚙️ إعدادات الوكيل الذكي</h3>
+        <form id="agentSettingsForm" style="display:flex; flex-direction:column; gap:12px;">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <input type="checkbox" id="agent_enabled" style="width:20px; height:20px; cursor:pointer;">
+            <label for="agent_enabled" style="margin:0; cursor:pointer; font-weight:bold;">تفعيل الوكيل في الخلفية</label>
+          </div>
+          
+          <div>
+            <label>المدينة المستهدفة للبحث</label>
+            <input id="agent_city" placeholder="الرياض / جدة / الدمام">
+          </div>
+
+          <div>
+            <label>جلسة الواتساب المرسلة</label>
+            <select id="agent_sender"></select>
+          </div>
+
+          <div style="display:flex; align-items:center; gap:8px;">
+            <input type="checkbox" id="agent_autosend" style="width:20px; height:20px; cursor:pointer;">
+            <label for="agent_autosend" style="margin:0; cursor:pointer;">إرسال الرسائل والمتابعات تلقائياً</label>
+          </div>
+
+          <div>
+            <label>فترة المتابعة التلقائية (بالأيام)</label>
+            <input type="number" id="agent_followup" min="1" max="14">
+          </div>
+
+          <div style="display:flex; gap:10px; margin-top:5px;">
+            <button class="btn" style="flex:1;" type="submit">حفظ الإعدادات</button>
+            <button class="btn btn-ghost" style="padding:10px;" type="button" onclick="runAgentNow()" title="تشغيل فوري">⚡ تشغيل الآن</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Discovery Tool -->
+      <div class="card card-right">
+        <h3>🔍 مكتشف العملاء الذكي (Lead Finder)</h3>
+        <div class="search-box">
+          <input id="searchCity" placeholder="اسم المدينة (مثال: Ad Darb Jazan)" value="الرياض">
+          <button class="btn btn-sm" onclick="discoverLeads()">بحث ذكي ⚡</button>
+        </div>
+        <div style="font-size:.75rem; color:var(--sub); margin-top:6px; line-height:1.6;">💡 للبلدات الصغيرة اكتب الاسم بالإنجليزية (مثل <b style="color:#c4a9ff">Ad Darb Jazan</b>) — أدقّ بكثير من العربية.</div>
+        <div id="radarContainer" class="radar-box" style="display:none">
+          <div class="radar-scanner"></div>
+          <div class="radar-console" id="radarConsole"></div>
+        </div>
+        <div id="discoveredLeadsContainer" style="display:none; margin-top: 15px;">
+          <h4 style="font-size:0.9rem; margin-bottom:8px;">المطاعم المكتشفة في <span id="discoveredCityTitle" style="color:var(--pink);"></span>:</h4>
+          <div id="discoveredLeadsList" class="discovered-list"></div>
+        </div>
+      </div>
+
+      <!-- Live Terminal logs -->
+      <div class="card card-right">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <h3>💻 لوحة سجل العمليات (Terminal)</h3>
+          <button class="btn btn-sm btn-ghost" onclick="clearLogs()" style="padding: 3px 8px; font-size: 0.75rem;">مسح</button>
+        </div>
+        <div class="terminal-box" id="terminal"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Draft/Outreach Modal -->
+<div class="overlay" id="draftOverlay">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="draftTitle">صياغة رسالة تواصل مخصصة</h3>
+      <button class="close" onclick="closeDraft()">&times;</button>
+    </div>
+    <div class="kindbtns">
+      <button class="btn btn-sm" onclick="genDraft('first_touch')">رسالة أولى</button>
+      <button class="btn btn-sm btn-ghost" onclick="genDraft('follow_up')">متابعة لطيفة</button>
+      <button class="btn btn-sm btn-ghost" onclick="genDraft('demo_invite')">دعوة لتجربة المنصة</button>
+    </div>
+    <div id="draftResults"><div class="empty">اختر نوع الرسالة من الأعلى ليصيغها الوكيل...</div></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const token = localStorage.getItem('wardat_token');
+const role = localStorage.getItem('wardat_role');
+if (!token || role !== 'superadmin') { localStorage.clear(); location.href='/login'; }
+const headers = { 'Authorization': 'Bearer '+token, 'Content-Type':'application/json' };
+
+const STATUSES = [
+  ['ALL','الكل'],['DUE','🔔 تحتاج متابعة'],['NEW','جديد'],['CONTACTED','تم التواصل'],['INTERESTED','مهتم'],
+  ['DEMO','عرض/تجربة'],['WON','مشترك ✅'],['LOST','غير مهتم']
+];
+const STATUS_LABEL = {NEW:'جديد',CONTACTED:'تم التواصل',INTERESTED:'مهتم',DEMO:'عرض/تجربة',WON:'مشترك',LOST:'غير مهتم'};
+let currentFilter = 'ALL';
+let currentDraftId = null, currentDraftPhone = null, currentDraftName = null;
+
+function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.style.display='block'; setTimeout(()=>t.style.display='none',1800); }
+
+// Escape untrusted text (prospect names/notes can originate from Google Places) before
+// inserting into innerHTML, to prevent stored XSS in the super-admin panel.
+function escapeHtml(text){ const d=document.createElement('div'); d.textContent=(text==null?'':String(text)); return d.innerHTML; }
+function escapeAttr(text){ return String(text==null?'':text).replace(/'/g,'&#39;').replace(/"/g,'&quot;'); }
+
+// Render status filters
+function renderFilters(){
+  document.getElementById('filters').innerHTML = STATUSES.map(([k,l])=>
+    `<div class="pill ${k===currentFilter?'on':''}" onclick="setFilter('${k}')">${l}</div>`).join('');
+}
+function setFilter(k){ currentFilter=k; renderFilters(); loadList(); }
+
+// Load dashboard stats
+async function loadStats(){
+  try {
+    const res = await fetch('/api/admin/prospects/stats',{headers}); 
+    const d = await res.json();
+    const order=['NEW','CONTACTED','INTERESTED','DEMO','WON','LOST'];
+    const totalCard = `<div class="stat"><div class="v">${d.total||0}</div><div class="l">الإجمالي</div></div>`;
+    const dueCard = `<div class="stat" style="border-color:rgba(240,192,106,.5);cursor:pointer" onclick="setFilter('DUE')"><div class="v" style="color:var(--amber)">${d.dueFollowups||0}</div><div class="l">🔔 تحتاج متابعة</div></div>`;
+    const html = totalCard + dueCard +
+      order.map(s=>`<div class="stat"><div class="v" style="color:${s==='WON'?'var(--green)':s==='LOST'?'var(--red)':'var(--text)'}">${d.counts[s]||0}</div><div class="l">${STATUS_LABEL[s]}</div></div>`).join('');
+    document.getElementById('stats').innerHTML = html;
+  } catch(e) {}
+}
+
+// Load prospect pipeline list
+async function loadList(){
+  try {
+    const q = currentFilter==='ALL' ? '' : (currentFilter==='DUE' ? '?due=1' : ('?status='+currentFilter));
+    const res = await fetch('/api/admin/prospects'+q,{headers});
+    const data = await res.json();
+    const list = document.getElementById('list');
+    if(!Array.isArray(data) || data.length===0){ list.innerHTML='<div class="empty">لا يوجد مطاعم في هذه القائمة بعد.</div>'; return; }
+    list.innerHTML = data.map(p=>{
+      const opts = Object.keys(STATUS_LABEL).map(s=>`<option value="${s}" ${p.status===s?'selected':''}>${STATUS_LABEL[s]}</option>`).join('');
+      const waNum = (p.phone||'').replace(/\D/g,'');
+      const contacts = [
+        p.phone?`<a href="https://wa.me/${waNum}" target="_blank" style="color:var(--green);text-decoration:none;font-weight:bold;">📱 ${escapeHtml(p.phone)}</a>`:'',
+        p.instagram?`<span style="color:#c4a9ff; font-weight:bold;">📷 ${escapeHtml(p.instagram)}</span>`:''
+      ].filter(Boolean).join(' · ');
+      const last = p.lastContact?('آخر تواصل: '+new Date(p.lastContact).toLocaleDateString('ar')):'لم يتم التواصل بعد';
+      const dueNote = p.due ? `<div class="p-meta" style="color:var(--amber);font-weight:bold;">⏰ متأخرة المتابعة منذ ${escapeHtml(p.staleDays)} يوم</div>` : '';
+      const nameAttr = escapeAttr(String(p.name||'').replace(/'/g,''));
+      return `<div class="p-card" style="${p.due?'border-color:rgba(240,192,106,.6);':''}">
+        <div class="p-head">
+          <div class="p-name">${escapeHtml(p.name)} <span class="badge st-${escapeAttr(p.status)}">${STATUS_LABEL[p.status]||''}</span>${p.due?' <span class="badge" style="background:rgba(240,192,106,.18);color:var(--amber)">🔔 متابعة</span>':''}</div>
+          <select onchange="changeStatus('${escapeAttr(p.id)}',this.value)" style="width:auto">${opts}</select>
+        </div>
+        <div class="p-meta">${escapeHtml([p.city,p.source].filter(Boolean).join(' · ')||'—')} • ${last}</div>
+        ${dueNote}
+        ${contacts?`<div class="p-meta">${contacts}</div>`:''}
+        <textarea rows="2" style="margin-top:6px;" placeholder="ملاحظات العميل..." onblur="saveNotes('${escapeAttr(p.id)}',this.value)">${escapeHtml(p.notes||'')}</textarea>
+        <div class="p-actions">
+          <button class="btn btn-sm" onclick="openDraft('${escapeAttr(p.id)}','${waNum}','${nameAttr}')">✍️ صياغة وإرسال</button>
+          <button class="btn btn-sm btn-ghost" onclick="touch('${escapeAttr(p.id)}')">⏱️ تم التواصل الآن</button>
+          <button class="btn btn-sm btn-ghost btn-red" onclick="del('${escapeAttr(p.id)}','${nameAttr}')">🗑️ حذف</button>
+        </div>
+      </div>`;
+    }).join('');
+  } catch(e) {}
+}
+
+async function changeStatus(id,status){ await fetch('/api/admin/prospects/'+id,{method:'PUT',headers,body:JSON.stringify({status})}); toast('تم تحديث الحالة'); loadStats(); loadList(); }
+async function saveNotes(id,notes){ await fetch('/api/admin/prospects/'+id,{method:'PUT',headers,body:JSON.stringify({notes})}); toast('تم حفظ الملاحظة'); }
+async function touch(id){ await fetch('/api/admin/prospects/'+id,{method:'PUT',headers,body:JSON.stringify({touch:true,status:'CONTACTED'})}); toast('سُجّل التواصل'); loadStats(); loadList(); }
+async function del(id,name){ if(!confirm('حذف "'+name+'"؟'))return; await fetch('/api/admin/prospects/'+id,{method:'DELETE',headers}); toast('تم الحذف'); loadStats(); loadList(); }
+
+// Add manually
+document.getElementById('addForm').addEventListener('submit', async e=>{
+  e.preventDefault();
+  const body = {
+    name:f_name.value.trim(), city:f_city.value.trim(), phone:f_phone.value.trim(),
+    instagram:f_instagram.value.trim(), source:f_source.value.trim()
+  };
+  const res = await fetch('/api/admin/prospects',{method:'POST',headers,body:JSON.stringify(body)});
+  if(res.ok){ e.target.reset(); toast('أُضيف المطعم للقائمة'); loadStats(); loadList(); }
+  else { const d=await res.json(); alert(d.error||'فشل'); }
+});
+
+// Agent settings
+async function loadAgentSettings() {
+  try {
+    const res = await fetch('/api/admin/agent/settings', { headers });
+    const d = await res.json();
+    if (res.ok) {
+      document.getElementById('agent_enabled').checked = d.settings.enabled;
+      document.getElementById('agent_city').value = d.settings.city;
+      document.getElementById('agent_followup').value = d.settings.followupDays;
+      document.getElementById('agent_autosend').checked = d.settings.autoSend;
+
+      const select = document.getElementById('agent_sender');
+      select.innerHTML = '<option value="">-- البوت معطل (إرسال يدوي فقط) --</option>' +
+        d.shops.map(s => `<option value="${s.id}">${s.name} (${s.subdomain}) - ${s.whatsappType}</option>`).join('');
+      select.value = d.settings.senderShopId;
+    }
+  } catch(e) {}
+}
+
+document.getElementById('agentSettingsForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const body = {
+    enabled: document.getElementById('agent_enabled').checked,
+    city: document.getElementById('agent_city').value.trim(),
+    senderShopId: document.getElementById('agent_sender').value,
+    followupDays: parseInt(document.getElementById('agent_followup').value, 10) || 3,
+    autoSend: document.getElementById('agent_autosend').checked,
+  };
+  const res = await fetch('/api/admin/agent/settings', { method: 'PUT', headers, body: JSON.stringify(body) });
+  if (res.ok) { toast('تم حفظ الإعدادات'); loadAgentSettings(); }
+  else { alert('فشل حفظ الإعدادات'); }
+});
+
+async function runAgentNow() {
+  if (!confirm('هل تريد تشغيل دورة الوكيل بالخلفية فوراً؟ سيتم البحث والتواصل مع المطاعم.')) return;
+  const res = await fetch('/api/admin/agent/run', { method: 'POST', headers });
+  if (res.ok) { toast('جاري تشغيل الوكيل بالخلفية...'); setTimeout(loadLogs, 1000); }
+}
+
+// Live logs terminal
+async function loadLogs() {
+  try {
+    const res = await fetch('/api/admin/agent/logs', { headers });
+    const d = await res.json();
+    if (res.ok && Array.isArray(d.logs)) {
+      const box = document.getElementById('terminal');
+      box.innerHTML = d.logs.map(l => {
+        let color = '#a7f3d0';
+        if (l.includes('[خطأ')) color = '#fca5a5';
+        else if (l.includes('[تنبيه')) color = '#fde047';
+        else if (l.includes('[بدء') || l.includes('[انتهاء')) color = '#38bdf8';
+        return `<div style="color: ${color}; margin-bottom: 4px;">${escapeHtml(l)}</div>`;
+      }).join('');
+      // Scroll to bottom
+      box.scrollTop = box.scrollHeight;
+    }
+  } catch(e) {}
+}
+
+async function clearLogs() {
+  if (confirm('تأكيد مسح سجلات المحرك؟')) {
+    await fetch('/api/admin/agent/clear-logs', { method: 'POST', headers });
+    loadLogs();
+  }
+}
+
+// Discover Leads (Radar)
+function consoleLogRadar(txt) {
+  const c = document.getElementById('radarConsole');
+  c.textContent += `[${new Date().toLocaleTimeString()}] ${txt}\n`;
+  c.scrollTop = c.scrollHeight;
+}
+
+async function discoverLeads() {
+  const city = document.getElementById('searchCity').value.trim();
+  if (!city) { alert('الرجاء إدخال اسم المدينة'); return; }
+  
+  const container = document.getElementById('radarContainer');
+  const consoleBox = document.getElementById('radarConsole');
+  const discoveredBox = document.getElementById('discoveredLeadsContainer');
+  
+  container.style.display = 'flex';
+  discoveredBox.style.display = 'none';
+  consoleBox.textContent = '';
+  
+  consoleLogRadar(`Scanning Google Maps for flower & gift shops in ${city}...`);
+  setTimeout(() => consoleLogRadar(`Detecting Instagram pages for local florists...`), 1200);
+  setTimeout(() => consoleLogRadar(`Checking WhatsApp numbers status...`), 2500);
+  
+  try {
+    const res = await fetch('/api/admin/agent/discover-leads', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ city })
+    });
+    
+    if (!res.ok) throw new Error('Failed to discover');
+    const data = await res.json();
+    
+      consoleLogRadar(`Success! Found ${data.length} flower shops.`);
+      container.style.display = 'none';
+      
+      document.getElementById('discoveredCityTitle').textContent = city;
+      discoveredBox.style.display = 'block';
+      
+      window.discoveredLeads = data;
+      const list = document.getElementById('discoveredLeadsList');
+
+      // Manual quick-search links — the reliable way to find Instagram/Snapchat-only shops.
+      const igKw = encodeURIComponent('مطاعم ' + city);
+      const linksHtml = `<div style="background:rgba(142,45,226,.12);border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:.82rem;line-height:2;">
+        🔎 <b>بحث يدوي سريع</b> (للمحلات الموجودة على انستقرام/سناب فقط — لا تظهر على خرائط Google):<br>
+        <a target="_blank" style="color:#c4a9ff;text-decoration:none" href="https://www.instagram.com/explore/search/keyword/?q=${igKw}">📷 انستقرام (بحث بالكلمة)</a> ·
+        <a target="_blank" style="color:#c4a9ff;text-decoration:none" href="https://www.google.com/search?q=${encodeURIComponent('instagram مطاعم ' + city)}">انستقرام عبر Google</a> ·
+        <a target="_blank" style="color:#c4a9ff;text-decoration:none" href="https://www.google.com/maps/search/${encodeURIComponent('مطاعم ' + city)}">🗺️ خرائط Google</a>
+      </div>`;
+
+      const itemsHtml = data.length ? data.map((l, index) => {
+        const contactInfo = [l.phone, l.instagram].filter(Boolean).join(' · ') || 'لا يوجد معلومات تواصل';
+        const igQuery = encodeURIComponent(`${l.name} ${l.city||''} انستقرام`);
+        const igSearch = `<a href="https://www.google.com/search?q=${igQuery}" target="_blank" style="color:#c4a9ff;text-decoration:none;">🔎 بحث انستقرام</a>`;
+        return `<div class="discovered-item">
+          <div class="discovered-info">
+            <div class="discovered-name">${escapeHtml(l.name)}</div>
+            <div class="discovered-subtext">${escapeHtml(contactInfo)} | ${escapeHtml(l.source)}</div>
+            <div class="discovered-subtext" style="font-style: italic; color: #a5b4fc;">${escapeHtml(l.notes)}</div>
+            <div class="discovered-subtext" style="margin-top:5px;">${igSearch}</div>
+          </div>
+          <button class="btn btn-sm" id="addBtn${index}" onclick="addDiscoveredLeadByIndex(${index})">➕ إضافة</button>
+        </div>`;
+      }).join('') : '<div class="empty">لم تظهر مطاعم على خرائط Google لهذه المنطقة. كثير من المطاعم الصغيرة موجودة على انستقرام فقط — استخدم روابط البحث بالأعلى وأضِفها يدوياً.</div>';
+
+      list.innerHTML = linksHtml + itemsHtml;
+  } catch(err) {
+    consoleLogRadar(`Error: ${err.message}`);
+    container.style.display = 'none';
+    alert('تعذّر جلب المطاعم: ' + err.message);
+  }
+}
+
+async function addDiscoveredLeadByIndex(index) {
+  const l = window.discoveredLeads[index];
+  if (!l) return;
+  const body = { 
+    name: l.name, 
+    city: l.city, 
+    phone: l.phone || "", 
+    instagram: l.instagram || "", 
+    source: l.source, 
+    notes: l.notes, 
+    status: 'NEW' 
+  };
+  const res = await fetch('/api/admin/prospects', { method: 'POST', headers, body: JSON.stringify(body) });
+  if (res.ok) {
+    toast(`تمت إضافة ${l.name} إلى القائمة`);
+    document.getElementById(`addBtn${index}`).textContent = '✅ تمت الإضافة';
+    document.getElementById(`addBtn${index}`).disabled = true;
+    loadStats();
+    loadList();
+  } else {
+    const d = await res.json();
+    alert(d.error || 'فشل الإضافة');
+  }
+}
+
+// AI Message generation
+function openDraft(id, phone, name){
+  currentDraftId = id;
+  currentDraftPhone = phone;
+  currentDraftName = name;
+  document.getElementById('draftTitle').textContent = 'صياغة رسالة لـ ' + name;
+  document.getElementById('draftResults').innerHTML = '<div class="empty">اختر نوع الرسالة من الأعلى ليصيغها الوكيل...</div>';
+  document.getElementById('draftOverlay').classList.add('on');
+}
+function closeDraft(){ document.getElementById('draftOverlay').classList.remove('on'); }
+
+async function genDraft(kind){
+  const box = document.getElementById('draftResults');
+  box.innerHTML = '<div class="empty"><span class="radar-scanner" style="width:20px; height:20px; display:inline-block; vertical-align:middle;"></span> الوكيل يكتب الرسالة الآن...</div>';
+  try {
+    const res = await fetch('/api/admin/prospects/'+currentDraftId+'/draft',{method:'POST',headers,body:JSON.stringify({kind})});
+    const d = await res.json();
+    if(!res.ok) throw new Error(d.error||'فشل توليد المسودة');
+    
+    // Also get active sender shop id
+    const senderShopId = document.getElementById('agent_sender').value;
+    
+    box.innerHTML = (d.variants||[]).map((v,i)=>{
+      const enc = encodeURIComponent(v);
+      const waLink = currentDraftPhone ? `<a class="btn btn-sm btn-ghost" style="text-decoration:none" target="_blank" href="https://wa.me/${currentDraftPhone}?text=${enc}">📱 إرسال عبر المتصفح (wa.me)</a>` : '';
+      const directBot = (currentDraftPhone && senderShopId) ? `<button class="btn btn-sm btn-green" onclick="sendViaBot('${currentDraftId}', '${senderShopId}', ${i})">🤖 إرسال فوري عبر البوت</button>` : '';
+      
+      return `<div class="variant" id="var${i}">${escapeHtml(v)}
+        <div class="v-actions">
+          <button class="btn btn-sm btn-ghost" onclick="copyVar(${i})">نسخ النص</button>
+          ${waLink}
+          ${directBot}
+        </div>
+      </div>`;
+    }).join('') || '<div class="empty">تعذّر توليد رسالة.</div>';
+  } catch(err) { box.innerHTML = '<div class="empty" style="color:var(--red);">' + err.message + '</div>'; }
+}
+
+function copyVar(i){ const el=document.getElementById('var'+i); const txt=el.childNodes[0].textContent; navigator.clipboard.writeText(txt); toast('نُسخت الرسالة'); }
+
+async function sendViaBot(prospectId, senderShopId, i) {
+  const el = document.getElementById('var'+i);
+  const message = el.childNodes[0].textContent.trim();
+  
+  if (!confirm('تأكيد إرسال هذه الرسالة فوراً عبر جلسة البوت النشطة؟')) return;
+  
+  toast('جاري الإرسال عبر البوت...');
+  try {
+    const res = await fetch('/api/admin/agent/send-message', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ prospectId, senderShopId, message })
+    });
+    const d = await res.json();
+    if (res.ok) {
+      toast('✅ تم إرسال الرسالة بنجاح!');
+      closeDraft();
+      loadStats();
+      loadList();
+      setTimeout(loadLogs, 1000);
+    } else {
+      alert(d.error || 'فشل إرسال الرسالة');
+    }
+  } catch(err) {
+    alert('فشل الاتصال بالخادم: ' + err.message);
+  }
+}
+
+// Initial triggers
+renderFilters();
+loadStats();
+loadList();
+loadAgentSettings();
+loadLogs();
+
+// Poll logs and stats every 4 seconds
+setInterval(() => {
+  loadLogs();
+  loadStats();
+}, 4000);
+
+</script>
+</body>
+</html>

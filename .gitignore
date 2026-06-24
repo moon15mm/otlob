@@ -1,0 +1,23 @@
+node_modules/
+dist/
+.env
+*.xlsx
+logs/*.log
+logs/*.log.gz
+logs/*.json
+data/whatsapp-sessions/
+
+.deploy_runner.py
+
+marketing/
+
+backups/
+.env.bak.*
+public/catalogs/
+public/uploads/
+
+# Android app project (kept out of the backend repo — large binaries)
+android-store-app/
+
+# Throwaway deploy helper scripts (never commit; may contain server access)
+_deploy_tmp.py
