@@ -50,7 +50,7 @@ export async function createBackup(): Promise<{ db: string; sessions?: string }>
   const s = stamp();
 
   // 1) Database (the critical data: shops, products, orders, prospects, settings)
-  const dbFile = path.join(BACKUP_DIR, `wardat-db-${s}.sql.gz`);
+  const dbFile = path.join(BACKUP_DIR, `otlob-db-${s}.sql.gz`);
   await execAsync(`pg_dump --no-owner --no-privileges | gzip > "${dbFile}"`, {
     env: pgEnv(),
     maxBuffer: 1024 * 1024 * 256,
@@ -60,7 +60,7 @@ export async function createBackup(): Promise<{ db: string; sessions?: string }>
   let sessionsName: string | undefined;
   const sessionsPath = path.join(DATA_DIR, 'whatsapp-sessions');
   if (fs.existsSync(sessionsPath)) {
-    const sessionsFile = path.join(BACKUP_DIR, `wardat-sessions-${s}.tar.gz`);
+    const sessionsFile = path.join(BACKUP_DIR, `otlob-sessions-${s}.tar.gz`);
     try {
       await execAsync(`tar czf "${sessionsFile}" -C "${DATA_DIR}" whatsapp-sessions`);
       sessionsName = path.basename(sessionsFile);
@@ -80,9 +80,9 @@ export function listBackups(): BackupItem[] {
     .filter((f) => f.endsWith('.gz'))
     .map((f) => {
       const st = fs.statSync(path.join(BACKUP_DIR, f));
-      const kind: BackupItem['kind'] = f.startsWith('wardat-db-')
+      const kind: BackupItem['kind'] = f.startsWith('otlob-db-')
         ? 'db'
-        : f.startsWith('wardat-sessions-')
+        : f.startsWith('otlob-sessions-')
         ? 'sessions'
         : 'other';
       return { name: f, size: st.size, createdAt: st.mtime, kind };
@@ -100,7 +100,7 @@ export function safeBackupPath(name: string): string | null {
 }
 
 /**
- * Restore the database from a `wardat-db-*.sql.gz` backup.
+ * Restore the database from a `otlob-db-*.sql.gz` backup.
  *
  * DESTRUCTIVE: this overwrites ALL current data. Safeguards:
  *  - validates the filename (no path traversal, DB backups only),
@@ -112,7 +112,7 @@ export function safeBackupPath(name: string): string | null {
  */
 export async function restoreBackup(name: string): Promise<{ safetyBackup: string; tables: number }> {
   const p = safeBackupPath(name);
-  if (!p || !name.startsWith('wardat-db-') || !name.endsWith('.sql.gz')) {
+  if (!p || !name.startsWith('otlob-db-') || !name.endsWith('.sql.gz')) {
     throw new Error('ملف غير صالح: الاستعادة متاحة لنسخ قاعدة البيانات فقط.');
   }
 
