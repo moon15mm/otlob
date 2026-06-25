@@ -608,7 +608,9 @@ router.put('/admin/settings', authenticateSuperAdmin, async (req, res) => {
       // Don't overwrite a secret with a masked placeholder or an empty value.
       const str = typeof val === 'string' ? val : '';
       if (str.startsWith('••••') || str.trim() === '') continue;
-      updates[key] = str.trim();
+      // Google shows Gmail App Passwords with spaces for readability; strip all
+      // whitespace from SMTP_PASS so SMTP AUTH receives the raw 16-char secret.
+      updates[key] = key === 'SMTP_PASS' ? str.replace(/\s+/g, '') : str.trim();
     } else {
       // Plain config (urls, host, port, user, from, secure flag) — store as-is.
       updates[key] = typeof val === 'string' ? val.trim() : String(val);
