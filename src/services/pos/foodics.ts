@@ -1,5 +1,6 @@
 import axios from 'axios';
 import logger from '../../utils/logger';
+import { assertSafeOutboundUrl, ssrfSafeHttpAgent, ssrfSafeHttpsAgent } from '../../utils/ssrf';
 import { POSProvider, OrderWithItems, Shop, PushResult, parsePosConfig } from './types';
 
 /**
@@ -66,10 +67,21 @@ export const foodicsProvider: POSProvider = {
       customer: { name: order.customerName, phone: order.customerPhone },
     };
 
+    // SSRF guard: a shop could override baseUrl to an internal address.
+    const ordersUrl = `${baseUrl}/orders`;
     try {
-      const res = await axios.post(`${baseUrl}/orders`, payload, {
+      assertSafeOutboundUrl(ordersUrl);
+    } catch (e: any) {
+      return { ok: false, error: `عنوان Foodics غير صالح: ${e.message}` };
+    }
+
+    try {
+      const res = await axios.post(ordersUrl, payload, {
         headers: { Authorization: `Bearer ${apiToken}`, 'Content-Type': 'application/json', Accept: 'application/json' },
         timeout: 20000,
+        maxRedirects: 0,
+        httpAgent: ssrfSafeHttpAgent,
+        httpsAgent: ssrfSafeHttpsAgent,
       });
       const ref = res?.data?.data?.id ?? res?.data?.id;
       logger.info(`[POS:foodics] Order ${order.id} created in Foodics (ref: ${ref || 'n/a'})`);

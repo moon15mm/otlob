@@ -2,6 +2,7 @@
 const TelegramBot = require('node-telegram-bot-api');
 import prisma from './db';
 import logger from '../utils/logger';
+import { safeImageExt } from '../utils/helpers';
 import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
@@ -241,7 +242,7 @@ export function initTelegramBot(token: string): void {
       const uploadsDir = path.join(__dirname, '../../public/uploads/products');
       if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
 
-      const ext = fileInfo.file_path?.split('.').pop() || 'jpg';
+      const ext = safeImageExt(fileInfo.file_path?.split('.').pop());
       const filename = `${shop.id}_${crypto.randomBytes(4).toString('hex')}.${ext}`;
       const localPath = path.join(uploadsDir, filename);
 

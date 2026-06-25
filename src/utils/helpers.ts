@@ -12,6 +12,17 @@ export function formatPrice(price: number, currency = 'SAR'): string {
 }
 
 /**
+ * Normalize a user/remote-supplied image extension or MIME subtype to a safe,
+ * known value. Prevents path traversal (e.g. "../../x") and stored-XSS via SVG
+ * when the resulting name is used to write into public/uploads.
+ */
+export function safeImageExt(raw: string | null | undefined): string {
+  const v = String(raw || '').toLowerCase().trim();
+  const map: Record<string, string> = { jpeg: 'jpg', jpg: 'jpg', png: 'png', webp: 'webp', gif: 'gif' };
+  return map[v] || 'jpg';
+}
+
+/**
  * Mask a phone number / JID for logging (PII minimization, GDPR/CWE-532).
  * Keeps a short prefix + last 2 digits so logs stay useful for support without
  * recording the full number, e.g. "966512345678" -> "9665****78".

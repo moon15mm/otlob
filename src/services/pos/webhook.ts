@@ -1,6 +1,7 @@
 import axios from 'axios';
 import crypto from 'crypto';
 import logger from '../../utils/logger';
+import { assertSafeOutboundUrl, ssrfSafeHttpAgent, ssrfSafeHttpsAgent } from '../../utils/ssrf';
 import { POSProvider, OrderWithItems, Shop, PushResult, parsePosConfig, derivePaymentMethod } from './types';
 
 /**
@@ -13,8 +14,11 @@ export const webhookProvider: POSProvider = {
   async pushOrder(order: OrderWithItems, shop: Shop): Promise<PushResult> {
     const cfg = parsePosConfig(shop);
     const url = String(cfg.url || '').trim();
-    if (!url || !/^https?:\/\//i.test(url)) {
-      return { ok: false, error: 'رابط الويبهوك (URL) غير مضبوط أو غير صالح في إعدادات نظام الكاشير.' };
+    // SSRF guard: reject empty/non-http(s) URLs and any literal internal address.
+    try {
+      assertSafeOutboundUrl(url);
+    } catch (e: any) {
+      return { ok: false, error: `رابط الويبهوك غير صالح: ${e.message}` };
     }
 
     const payload = buildPayload(order, shop);
@@ -27,7 +31,15 @@ export const webhookProvider: POSProvider = {
     }
 
     try {
-      const res = await axios.post(url, body, { headers, timeout: 15000 });
+      // Guarded agents validate the resolved IP at connect time (blocks DNS rebinding);
+      // maxRedirects:0 prevents a public host from redirecting us to an internal one.
+      const res = await axios.post(url, body, {
+        headers,
+        timeout: 15000,
+        maxRedirects: 0,
+        httpAgent: ssrfSafeHttpAgent,
+        httpsAgent: ssrfSafeHttpsAgent,
+      });
       const ref = res?.data?.id ?? res?.data?.ref ?? res?.data?.orderId;
       logger.info(`[POS:webhook] Order ${order.id} delivered to ${url}`);
       return { ok: true, ref: ref != null ? String(ref) : undefined };

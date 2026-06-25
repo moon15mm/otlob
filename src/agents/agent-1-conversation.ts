@@ -4,7 +4,7 @@ import { getAIResponse, classifyIntent } from '../services/openai';
 import { sendTextMessage, sendImageMessage, sendLocationRequest, WhatsAppConfig } from '../services/whatsapp';
 import { getAllProducts, getProductByName, formatProductList, sendProductCatalog } from '../products';
 import { addToCart, cartTotal, cartCount, summarizeCart, formatCartSummary } from '../cart';
-import { generateOrderId, formatPrice, maskPhone } from '../utils/helpers';
+import { generateOrderId, formatPrice, maskPhone, safeImageExt } from '../utils/helpers';
 import { processPayment } from './agent-2-payment';
 import { addOrder } from './agent-3-excel';
 import { pushOrderToPOS } from '../services/pos';
@@ -1189,7 +1189,7 @@ async function handleOwnerMessage(
     const uploadsDir = path.join(__dirname, '../../public/uploads/products');
     if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
     
-    const ext = msg.image.mime_type.split('/')[1] || 'jpeg';
+    const ext = safeImageExt(msg.image.mime_type.split('/')[1]);
     const filename = `${shopId}_${crypto.randomBytes(4).toString('hex')}.${ext}`;
     fs.writeFileSync(path.join(uploadsDir, filename), msg.image.buffer);
     
