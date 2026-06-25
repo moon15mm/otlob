@@ -13,7 +13,7 @@ import { getAgentLogs, clearAgentLogs, logAgentAction } from '../utils/agent-log
 import { discoverFlowerShops } from '../services/lead-finder';
 import { sendTextMessage, WhatsAppConfig } from '../services/whatsapp';
 import { getSessionStatus } from '../services/baileys-manager';
-import { pushOrderToPOS } from '../services/pos';
+import { pushOrderToPOS, SUPPORTED_POS_PROVIDERS } from '../services/pos';
 import { maskPhone } from '../utils/helpers';
 import { estimateCostUsd } from '../services/ai-usage';
 
@@ -1062,9 +1062,9 @@ router.get('/shop/details', authenticateShop, async (req, res) => {
       geminiApiKey: maskSecret(shop.geminiApiKey),
       openaiApiKey: maskSecret(shop.openaiApiKey),
       ultramsgToken: maskSecret(shop.ultramsgToken),
-      // POS integration: masked config + which providers the platform admin enabled.
+      // POS integration: masked config + all supported providers (each shop picks its own).
       posConfig: maskPosConfig(shop.posConfig),
-      posProvidersEnabled: settings.getEnabledPosProviders(),
+      posProvidersEnabled: SUPPORTED_POS_PROVIDERS,
       monthlyOrdersCount,
     };
 
@@ -1215,11 +1215,10 @@ router.put('/shop/details', authenticateShop, async (req, res) => {
     applySecret('openaiApiKey', finalOpenaiApiKey);
     applySecret('ultramsgToken', ultramsgToken);
 
-    // POS integration (cashier/kitchen). Only allow a provider the platform admin enabled.
-    const enabledPos = settings.getEnabledPosProviders();
+    // POS integration (cashier/kitchen). Each shop picks any supported provider for itself.
     if (posProvider !== undefined) {
       const prov = String(posProvider || 'NONE').toUpperCase();
-      if (prov === 'NONE' || enabledPos.includes(prov)) {
+      if (prov === 'NONE' || SUPPORTED_POS_PROVIDERS.includes(prov)) {
         updateData.posProvider = prov;
       }
     }

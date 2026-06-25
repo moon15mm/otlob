@@ -11,6 +11,9 @@ const REGISTRY: Record<string, POSProvider> = {
   WEBHOOK: webhookProvider,
 };
 
+// كل الأنظمة المدعومة — متاحة لكل مطعم ليختار نظامه بنفسه (لا قيد على مستوى المنصّة).
+export const SUPPORTED_POS_PROVIDERS: string[] = Object.keys(REGISTRY);
+
 export function getProvider(id: string | null | undefined): POSProvider | undefined {
   if (!id) return undefined;
   return REGISTRY[id.toUpperCase()];

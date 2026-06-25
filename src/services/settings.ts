@@ -41,8 +41,6 @@ export const SETTING_KEYS = [
   'FOLLOWUP_DAYS', 'AGENT_ENABLED', 'AGENT_CITY', 'AGENT_SENDER_SHOP_ID', 'AGENT_AUTOSEND', 'GOOGLE_PLACES_API_KEY',
   // Backups
   'BACKUP_ENABLED', 'BACKUP_RETENTION_DAYS',
-  // POS integration catalog (which cashier/kitchen systems shops may enable)
-  'POS_PROVIDERS_ENABLED',
 ] as const;
 export type SettingKey = typeof SETTING_KEYS[number];
 
@@ -54,14 +52,6 @@ export const SECRET_KEYS = new Set<string>([
 export function getFollowupDays(): number {
   const n = parseInt(raw('FOLLOWUP_DAYS') || '3', 10);
   return isNaN(n) ? 3 : Math.min(60, Math.max(1, n));
-}
-
-// أنظمة الكاشير المتاحة على المنصّة (يفعّلها الأدمن العام). قائمة فارغة = لا تكامل متاح.
-export function getEnabledPosProviders(): string[] {
-  return (raw('POS_PROVIDERS_ENABLED') || '')
-    .split(',')
-    .map((s) => s.trim().toUpperCase())
-    .filter(Boolean);
 }
 
 export function getOpenAI(): { apiKey: string; model: string } {

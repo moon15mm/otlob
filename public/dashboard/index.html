@@ -2930,7 +2930,7 @@
         document.getElementById('autoPostStatusInput').checked = safeBool(shop.autoPostStatus, false);
         document.getElementById('autoPostStatusTimeInput').value = shop.autoPostStatusTime || '10:00';
 
-        // POS integration: show only providers the platform enabled, restore this shop's config.
+        // POS integration: list all supported systems; each shop picks & configures its own.
         renderPosOptions(shop.posProvidersEnabled, shop.posProvider || 'NONE', shop.posConfig || {});
 
         toggleShopWhatsappFields();
