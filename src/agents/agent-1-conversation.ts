@@ -7,6 +7,7 @@ import { addToCart, cartTotal, cartCount, summarizeCart, formatCartSummary } fro
 import { generateOrderId, formatPrice, maskPhone } from '../utils/helpers';
 import { processPayment } from './agent-2-payment';
 import { addOrder } from './agent-3-excel';
+import { pushOrderToPOS } from '../services/pos';
 import prisma from '../services/db';
 import logger from '../utils/logger';
 import fs from 'fs';
@@ -1083,7 +1084,10 @@ async function proceedWithPaymentMethod(
     } catch (err) {
       logger.warn(`[Agent1] Failed to send admin notification for COD order ${orderId}: ${err}`);
     }
-    
+
+    // الطلب النقدي مؤكَّد فوراً → أرسله لنظام الكاشير/المطبخ (غير محجوب، idempotent).
+    pushOrderToPOS(orderId).catch(() => {});
+
     session.state = 'COMPLETED';
     session.orderData = {};
     session.selectedProduct = undefined;

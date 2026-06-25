@@ -2019,6 +2019,42 @@
               </div>
             </div>
 
+            <!-- POS (Cashier/Kitchen) Integration -->
+            <div id="posSection" style="display:none;">
+              <h4 style="margin: 20px 0 10px 0; color: var(--purple-glow); border-bottom: 1px solid var(--glass-border); padding-bottom: 5px;">🧾 نظام الكاشير/المطبخ (POS)</h4>
+              <p style="font-size: 0.85rem; color: var(--text-sub); margin-bottom: 12px;">بعد تأكيد الطلب يُرسَل تلقائياً إلى نظام مطعمك ليظهر في الكاشير والمطبخ ويخصم من مخزونك.</p>
+              <div class="form-group">
+                <label for="posProviderInput">نظام الكاشير</label>
+                <select id="posProviderInput" onchange="togglePosFields()" style="background: rgba(0,0,0,0.3); color: var(--text-main); border: 1px solid var(--glass-border); padding: 12px; border-radius: 8px; width: 100%;"></select>
+              </div>
+
+              <div id="foodicsFieldsGroup" style="display:none;">
+                <div class="form-group">
+                  <label for="foodicsApiTokenInput">Foodics API Token</label>
+                  <input type="text" id="foodicsApiTokenInput">
+                </div>
+                <div class="form-group">
+                  <label for="foodicsBranchIdInput">Foodics Branch ID (معرّف الفرع)</label>
+                  <input type="text" id="foodicsBranchIdInput">
+                </div>
+                <div class="form-group">
+                  <label for="foodicsMenuMapInput">ربط القائمة (JSON: معرّف الصنف عندنا ← معرّف الصنف في Foodics)</label>
+                  <textarea id="foodicsMenuMapInput" rows="4" placeholder='{"ourProductId":"foodicsProductId"}' style="background: rgba(0,0,0,0.3); color: var(--text-main); border: 1px solid var(--glass-border); padding: 12px; border-radius: 8px; width: 100%; font-family: monospace; direction: ltr;"></textarea>
+                </div>
+              </div>
+
+              <div id="webhookFieldsGroup" style="display:none;">
+                <div class="form-group">
+                  <label for="webhookUrlInput">رابط الويبهوك (URL)</label>
+                  <input type="text" id="webhookUrlInput" placeholder="https://...">
+                </div>
+                <div class="form-group">
+                  <label for="webhookSecretInput">المفتاح السرّي (Secret — لتوقيع الطلبات، اختياري)</label>
+                  <input type="text" id="webhookSecretInput">
+                </div>
+              </div>
+            </div>
+
             <!-- Auto-post WhatsApp Status Settings -->
             <div id="statusSettingsSection" style="background: rgba(37, 211, 102, 0.05); border: 1px solid rgba(37, 211, 102, 0.2); padding: 20px; border-radius: 12px; margin-bottom: 15px; display: none;">
               <h4 style="color: #25D366; margin-top: 0;">🤖 نشر الحالات (الستوري) التلقائي</h4>
@@ -2860,6 +2896,13 @@
         const siteOrigin = window.location.origin;
         document.getElementById('stripeSuccessUrlInput').value = shop.stripeSuccessUrl || `${siteOrigin}/success`;
         document.getElementById('stripeCancelUrlInput').value = shop.stripeCancelUrl || `${siteOrigin}/cancel`;
+        // Restore the saved payment gateway + its (masked) key, then show the matching fields.
+        // Without this the select defaults to STRIPE and a save would overwrite the real gateway.
+        document.getElementById('paymentGatewayInput').value = shop.paymentGateway || 'STRIPE';
+        setSecret('moyasarApiKeyInput', !!shop.moyasarApiKey);
+        setSecret('tapApiKeyInput', !!shop.tapApiKey);
+        setSecret('myfatoorahApiKeyInput', !!shop.myfatoorahApiKey);
+        togglePaymentFields();
         document.getElementById('aiProviderInput').value = shop.aiProvider || 'OPENAI';
         setSecret('geminiApiKeyInput', !!shop.geminiApiKey);
         setSecret('openaiApiKeyInput', !!shop.openaiApiKey);
@@ -2886,6 +2929,9 @@
 
         document.getElementById('autoPostStatusInput').checked = safeBool(shop.autoPostStatus, false);
         document.getElementById('autoPostStatusTimeInput').value = shop.autoPostStatusTime || '10:00';
+
+        // POS integration: show only providers the platform enabled, restore this shop's config.
+        renderPosOptions(shop.posProvidersEnabled, shop.posProvider || 'NONE', shop.posConfig || {});
 
         toggleShopWhatsappFields();
         // Apply Subscription Restrictions in UI
@@ -3070,6 +3116,67 @@
       document.getElementById('myfatoorahFieldsGroup').style.display = gateway === 'MYFATOORAH' ? 'block' : 'none';
     }
 
+    // ---- POS (cashier/kitchen) integration ----
+    const POS_PROVIDER_LABELS = { FOODICS: 'Foodics', WEBHOOK: 'Webhook عام (أي نظام آخر)' };
+
+    function togglePosFields() {
+      const sel = document.getElementById('posProviderInput');
+      const provider = sel ? sel.value : 'NONE';
+      document.getElementById('foodicsFieldsGroup').style.display = provider === 'FOODICS' ? 'block' : 'none';
+      document.getElementById('webhookFieldsGroup').style.display = provider === 'WEBHOOK' ? 'block' : 'none';
+    }
+
+    // Build the provider dropdown from what the platform admin enabled, and restore saved config.
+    function renderPosOptions(enabled, current, config) {
+      const section = document.getElementById('posSection');
+      const sel = document.getElementById('posProviderInput');
+      if (!section || !sel) return;
+      enabled = Array.isArray(enabled) ? enabled : [];
+      if (enabled.length === 0) { section.style.display = 'none'; return; } // nothing enabled platform-wide
+      section.style.display = 'block';
+
+      let html = '<option value="NONE">بدون (لا تكامل)</option>';
+      enabled.forEach(p => { html += `<option value="${p}">${POS_PROVIDER_LABELS[p] || p}</option>`; });
+      sel.innerHTML = html;
+      sel.value = enabled.includes(current) ? current : 'NONE';
+
+      config = config || {};
+      // Secret fields: keep input empty + show "saved" placeholder so we never echo the secret back.
+      const ftok = document.getElementById('foodicsApiTokenInput');
+      if (ftok) { ftok.value = ''; ftok.placeholder = config.apiToken ? '••• محفوظ — اكتب قيمة جديدة للتغيير' : ''; }
+      document.getElementById('foodicsBranchIdInput').value = config.branchId || '';
+      document.getElementById('foodicsMenuMapInput').value = (config.menuMap && typeof config.menuMap === 'object') ? JSON.stringify(config.menuMap, null, 2) : '';
+      const wsec = document.getElementById('webhookSecretInput');
+      if (wsec) { wsec.value = ''; wsec.placeholder = config.secret ? '••• محفوظ — اكتب قيمة جديدة للتغيير' : ''; }
+      document.getElementById('webhookUrlInput').value = config.url || '';
+
+      togglePosFields();
+    }
+
+    // Assemble the posProvider + posConfig to send on save. Returns null on invalid input (caller aborts).
+    function collectPosPayload() {
+      const sel = document.getElementById('posProviderInput');
+      const provider = sel ? sel.value : 'NONE';
+      const out = { posProvider: provider };
+      if (provider === 'FOODICS') {
+        const cfg = { branchId: document.getElementById('foodicsBranchIdInput').value.trim() };
+        const tok = document.getElementById('foodicsApiTokenInput').value.trim();
+        if (tok) cfg.apiToken = tok; // omit when empty → server keeps the saved token
+        const mapText = document.getElementById('foodicsMenuMapInput').value.trim();
+        if (mapText) {
+          try { cfg.menuMap = JSON.parse(mapText); }
+          catch (e) { alert('صيغة ربط القائمة (JSON) غير صحيحة'); return null; }
+        } else { cfg.menuMap = {}; }
+        out.posConfig = cfg;
+      } else if (provider === 'WEBHOOK') {
+        const cfg = { url: document.getElementById('webhookUrlInput').value.trim() };
+        const sec = document.getElementById('webhookSecretInput').value.trim();
+        if (sec) cfg.secret = sec; // omit when empty → server keeps the saved secret
+        out.posConfig = cfg;
+      }
+      return out;
+    }
+
     async function checkWaStatus() {
       try {
         const res = await fetch('/api/shop/whatsapp/status', { headers });
@@ -3206,6 +3313,14 @@
         autoPostStatus: document.getElementById('autoPostStatusInput').checked,
         autoPostStatusTime: document.getElementById('autoPostStatusTimeInput').value,
       };
+
+      // POS integration (only when the section is shown / a provider is enabled).
+      if (document.getElementById('posSection').style.display !== 'none') {
+        const pos = collectPosPayload();
+        if (pos === null) return; // invalid menu-map JSON — abort save
+        payload.posProvider = pos.posProvider;
+        if (pos.posConfig !== undefined) payload.posConfig = pos.posConfig;
+      }
 
       const newPassword = document.getElementById('shopPasswordInput').value;
       if (newPassword) {

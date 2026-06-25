@@ -2,6 +2,7 @@ import Stripe from 'stripe';
 import { getSessionDetails, StripeConfig } from '../services/stripe-service';
 import { sendTextMessage, sendToAdminGroup, WhatsAppConfig } from '../services/whatsapp';
 import { updateOrderStatus, addFinanceRecord } from './agent-3-excel';
+import { pushOrderToPOS } from '../services/pos';
 import { clearSession } from '../services/session';
 import prisma from '../services/db';
 import logger from '../utils/logger';
@@ -128,6 +129,9 @@ export async function handleGenericPaymentSuccess(details: GenericPaymentDetails
   } catch (err) {
     logger.warn(`[Agent4] Failed to send admin notification for order ${orderId}: ${err}`);
   }
+
+  // الدفع الإلكتروني تأكّد → أرسل الطلب لنظام الكاشير/المطبخ (غير محجوب، idempotent).
+  pushOrderToPOS(orderId).catch(() => {});
 
   await clearSession(customerPhone, shopId);
   logger.info(`[Agent4] Order ${orderId} fully processed`);

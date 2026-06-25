@@ -542,6 +542,16 @@ const server = app.listen(PORT, async () => {
     }
   });
 
+  // Every 10 minutes: retry orders that failed to sync to the shop's cashier/kitchen (POS).
+  cron.schedule('*/10 * * * *', async () => {
+    try {
+      const { retryFailedPosSyncs } = require('./services/pos');
+      await retryFailedPosSyncs();
+    } catch (err: any) {
+      logger.error(`[Cron] Error retrying POS syncs: ${err.message}`);
+    }
+  });
+
   // Hourly Cron Job to automatically post WhatsApp statuses for opted-in shops
   cron.schedule('0 * * * *', async () => {
     try {

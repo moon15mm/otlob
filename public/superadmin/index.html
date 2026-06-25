@@ -772,6 +772,13 @@
           <div class="form-group"><label>SMTP From</label><input type="text" id="set_SMTP_FROM" placeholder="اطلب &lt;no-reply@otlob.xyz&gt;"></div>
         </div>
 
+        <h4 style="margin:18px 0 12px; color: var(--pink-glow); border-bottom:1px solid var(--glass-border); padding-bottom:6px;">🧾 أنظمة الكاشير/المطبخ المتاحة (POS)</h4>
+        <p style="font-size:0.82rem; color: var(--text-sub); margin:-4px 0 10px;">فعّل الأنظمة التي يُسمح للمطاعم بربطها. ستظهر حقول إعدادها في لوحة المتجر فقط بعد التفعيل هنا.</p>
+        <div class="form-grid">
+          <label style="display:flex; align-items:center; gap:8px; cursor:pointer;"><input type="checkbox" id="pos_FOODICS"> <span>Foodics</span></label>
+          <label style="display:flex; align-items:center; gap:8px; cursor:pointer;"><input type="checkbox" id="pos_WEBHOOK"> <span>Webhook عام (أي نظام آخر)</span></label>
+        </div>
+
         <p style="font-size:0.8rem; color: var(--text-sub); margin-top:14px; text-align:right;">الحقول التي تظهر بـ •••• محفوظة مسبقاً — اتركها كما هي للإبقاء عليها، أو اكتب قيمة جديدة لتغييرها.</p>
 
         <div class="modal-actions">
@@ -850,6 +857,12 @@
           const el = document.getElementById('set_' + k);
           if (el) el.value = data[k] != null ? data[k] : '';
         });
+        // POS catalog: tick the providers the platform has enabled.
+        const posEnabled = (data['POS_PROVIDERS_ENABLED'] || '').toUpperCase().split(',').map(s => s.trim());
+        ['FOODICS','WEBHOOK'].forEach(p => {
+          const cb = document.getElementById('pos_' + p);
+          if (cb) cb.checked = posEnabled.includes(p);
+        });
         document.getElementById('settingsModal').style.display = 'flex';
       } catch (err) {
         alert(err.message);
@@ -869,6 +882,10 @@
         const el = document.getElementById('set_' + k);
         if (el) payload[k] = el.value.trim();
       });
+      // POS catalog: collect ticked providers into a comma-separated list.
+      payload['POS_PROVIDERS_ENABLED'] = ['FOODICS','WEBHOOK']
+        .filter(p => { const cb = document.getElementById('pos_' + p); return cb && cb.checked; })
+        .join(',');
       try {
         const res = await fetch('/api/admin/settings', {
           method: 'PUT', headers, body: JSON.stringify(payload)

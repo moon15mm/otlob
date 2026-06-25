@@ -13,6 +13,7 @@ import { getAgentLogs, clearAgentLogs, logAgentAction } from '../utils/agent-log
 import { discoverFlowerShops } from '../services/lead-finder';
 import { sendTextMessage, WhatsAppConfig } from '../services/whatsapp';
 import { getSessionStatus } from '../services/baileys-manager';
+import { pushOrderToPOS } from '../services/pos';
 import { maskPhone } from '../utils/helpers';
 import { estimateCostUsd } from '../services/ai-usage';
 
@@ -56,6 +57,22 @@ function maskSecret(value: string | null | undefined): string | null {
   if (!value) return null;
   if (value.length <= 4) return '••••';
   return '••••' + value.slice(-4);
+}
+
+const POS_SECRET_FIELDS = ['apiToken', 'secret'];
+
+// Safe-parse a JSON string into an object (never throws).
+function safeJson(value: string | null | undefined): Record<string, any> {
+  try { return JSON.parse(value || '{}') || {}; } catch { return {}; }
+}
+
+// Parse Shop.posConfig and mask its secret fields for the dashboard.
+function maskPosConfig(raw: string | null | undefined): Record<string, any> {
+  const cfg = safeJson(raw);
+  for (const k of POS_SECRET_FIELDS) {
+    if (cfg[k]) cfg[k] = maskSecret(String(cfg[k]));
+  }
+  return cfg;
 }
 
 // -------------------------------------------------------------
@@ -1045,6 +1062,9 @@ router.get('/shop/details', authenticateShop, async (req, res) => {
       geminiApiKey: maskSecret(shop.geminiApiKey),
       openaiApiKey: maskSecret(shop.openaiApiKey),
       ultramsgToken: maskSecret(shop.ultramsgToken),
+      // POS integration: masked config + which providers the platform admin enabled.
+      posConfig: maskPosConfig(shop.posConfig),
+      posProvidersEnabled: settings.getEnabledPosProviders(),
       monthlyOrdersCount,
     };
 
@@ -1098,6 +1118,8 @@ router.put('/shop/details', authenticateShop, async (req, res) => {
     enableCashPayment,
     enableBankTransfer,
     bankAccounts,
+    posProvider,
+    posConfig,
     password,
   } = req.body;
 
@@ -1192,6 +1214,27 @@ router.put('/shop/details', authenticateShop, async (req, res) => {
     applySecret('geminiApiKey', finalGeminiApiKey);
     applySecret('openaiApiKey', finalOpenaiApiKey);
     applySecret('ultramsgToken', ultramsgToken);
+
+    // POS integration (cashier/kitchen). Only allow a provider the platform admin enabled.
+    const enabledPos = settings.getEnabledPosProviders();
+    if (posProvider !== undefined) {
+      const prov = String(posProvider || 'NONE').toUpperCase();
+      if (prov === 'NONE' || enabledPos.includes(prov)) {
+        updateData.posProvider = prov;
+      }
+    }
+    if (posConfig !== undefined) {
+      const incoming = typeof posConfig === 'string' ? safeJson(posConfig) : (posConfig || {});
+      const existing = safeJson(shop.posConfig);
+      const merged: Record<string, any> = { ...existing, ...incoming };
+      // Preserve stored secrets when the dashboard echoes back a masked placeholder.
+      for (const k of POS_SECRET_FIELDS) {
+        if (typeof incoming[k] === 'string' && incoming[k].startsWith('••••')) {
+          merged[k] = existing[k];
+        }
+      }
+      updateData.posConfig = JSON.stringify(merged);
+    }
 
     if (password) {
       updateData.password = await hashPassword(password);
@@ -1532,6 +1575,12 @@ router.put('/shop/orders/:id', authenticateShop, async (req, res) => {
     if (Object.keys(updateData).length === 0) return res.status(400).json({ error: 'بيانات التحديث غير صالحة' });
 
     await prisma.order.update({ where: { id: order.id }, data: updateData });
+
+    // When an order becomes CONFIRMED here (e.g. admin approves a bank transfer),
+    // push it into the shop's cashier/kitchen system. Non-blocking + idempotent.
+    if (status === 'CONFIRMED' && order.paymentStatus !== 'CONFIRMED') {
+      pushOrderToPOS(order.id).catch(() => {});
+    }
 
     // Cancelling/failing an order frees the customer's chat session
     if (status === 'CANCELLED' || status === 'FAILED') {

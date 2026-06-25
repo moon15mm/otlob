@@ -74,6 +74,10 @@ model Shop {
   enableBankTransfer  Boolean   @default(false) // دفع بالتحويل البنكي
   bankAccounts        String    @default("[]")  // حسابات بنكية بصيغة JSON
 
+  // تكامل نظام الكاشير/المطبخ (POS) لكل مطعم
+  posProvider         String    @default("NONE") // NONE | FOODICS | WEBHOOK (ضمن ما يفعّله الأدمن العام)
+  posConfig           String    @default("{}")   // JSON مرن لكل مزوّد (FOODICS: apiToken/branchId/menuMap, WEBHOOK: url/secret)
+
   createdAt           DateTime  @default(now())
   products            Product[]
   orders              Order[]
@@ -158,6 +162,11 @@ model Order {
   stripeSessionId String?
   cardLast4       String?
   productId       String?
+
+  // outbox مزامنة نظام الكاشير/المطبخ (POS) — للموثوقية وإعادة المحاولة
+  posSyncStatus   String   @default("NONE") // NONE | PENDING | SENT | FAILED
+  posSyncError    String?                   // آخر رسالة خطأ عند الفشل
+  posRef          String?                   // معرّف الطلب داخل نظام المطعم (للتتبّع)
 
   items           OrderItem[]
 
